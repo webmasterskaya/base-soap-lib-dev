@@ -5,7 +5,7 @@
 Описание основных ассемблеров кода читайте [тут](https://github.com/phpro/soap-client/blob/master/docs/code-generation/assemblers.md).
 Как создавать свои собственные генераторы, читайте [тут](https://github.com/phpro/soap-client/blob/master/docs/code-generation/assemblers.md#creating-your-own-assembler).
 
-# Спсок генераторов
+# Список генераторов
 
 - [ArrayPropertyAssembler](#arraypropertyassembler)
 
