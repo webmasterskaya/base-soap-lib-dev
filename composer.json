@@ -15,5 +15,11 @@
 			"Webmasterskaya\\Soap\\Base\\Dev\\": "src/"
 		}
 	},
+    "authors": [
+        {
+            "name": "Artem Vasilev",
+            "email": "dev@webmasterskaya.xyz"
+        }
+    ],
     "minimum-stability": "stable"
 }
