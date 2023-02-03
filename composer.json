@@ -7,8 +7,8 @@
 		"php": ">=7.1"
 	},
 	"require-dev": {
-		"phpro/soap-client": "v1",
-		"laminas/laminas-code": "3.1.0"
+		"phpro/soap-client": "~v1",
+		"laminas/laminas-code": "~3.1.0"
 	},
 	"autoload": {
 		"psr-4": {
