@@ -8,6 +8,7 @@ use Phpro\SoapClient\CodeGenerator\Assembler\AssemblerInterface;
 use Phpro\SoapClient\CodeGenerator\Context\ClassMapContext;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\CodeGenerator\Model\TypeMap;
+use Phpro\SoapClient\CodeGenerator\Util\Normalizer;
 use Phpro\SoapClient\Exception\AssemblerException;
 use Soap\ExtSoapEngine\Configuration\ClassMap\ClassMap;
 use Soap\ExtSoapEngine\Configuration\ClassMap\ClassMapCollection;
@@ -35,7 +36,7 @@ class ClassMapAssembler implements AssemblerInterface
         $class = ClassGenerator::fromArray(
             [
                 'name' => $context->getName(),
-                'implementedinterfaces' => [ClientClassMapCollectionInterface::class]
+                'implementedinterfaces' => [Normalizer::getClassNameFromFQN(ClientClassMapCollectionInterface::class)]
             ]
         );
         $file = $context->getFile();
@@ -98,9 +99,9 @@ class ClassMapAssembler implements AssemblerInterface
     private function assembleClassMapCollection(string $classMap, string $linefeed): string
     {
         $code = [
-            'new ClassMapCollection([',
+            'new ClassMapCollection(',
             '%s',
-            ']);',
+            ');',
         ];
 
         return sprintf(implode($linefeed, $code), $classMap);
