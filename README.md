@@ -2,7 +2,7 @@
 
 Инструмент содержит набор классов для настройки генерации кода [`phpro/soap-client`](https://github.com/phpro/soap-client).
 
-> *Note*
+> **Note**
 > Для обеспечения совместимасти с PHP >= 7.1 используйте `phpro/soap-client:~v1`
  
 ## Набор классов:
