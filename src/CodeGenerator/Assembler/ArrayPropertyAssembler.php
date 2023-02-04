@@ -8,7 +8,7 @@ use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\MethodGenerator;
 use Laminas\Code\Generator\PropertyGenerator;
 use Phpro\SoapClient\CodeGenerator\Assembler\AssemblerInterface;
-use Phpro\SoapClient\CodeGenerator\Assembler\InterfaceAssembler;
+use Phpro\SoapClient\CodeGenerator\Assembler\IteratorAssembler;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\CodeGenerator\Context\TypeContext;
 use Phpro\SoapClient\CodeGenerator\LaminasCodeFactory\DocBlockGeneratorFactory;
@@ -31,17 +31,17 @@ class ArrayPropertyAssembler implements AssemblerInterface
         $firstProperty = count($properties) ? current($properties) : null;
 
         try {
-            $iteratorAggregateAssembler = new InterfaceAssembler(\IteratorAggregate::class);
-            if ($iteratorAggregateAssembler->canAssemble($context)) {
-                $iteratorAggregateAssembler->assemble($context);
+            $iteratorAssembler = new IteratorAssembler();
+            if ($iteratorAssembler->canAssemble($context)) {
+                $iteratorAssembler->assemble($context);
             }
 
-            $arrayAccessAssembler = new InterfaceAssembler(\ArrayAccess::class);
+            $arrayAccessAssembler = new ArrayAccessAssembler();
             if ($arrayAccessAssembler->canAssemble($context)) {
                 $arrayAccessAssembler->assemble($context);
             }
 
-            $countableAssembler = new InterfaceAssembler(\Countable::class);
+            $countableAssembler = new CountableAssembler();
             if ($countableAssembler->canAssemble($context)) {
                 $countableAssembler->assemble($context);
             }
@@ -50,15 +50,6 @@ class ArrayPropertyAssembler implements AssemblerInterface
                 $this->implementGetter($class, $firstProperty);
                 $this->implementImmutableSetter($class, $firstProperty);
                 $this->implementSetter($class, $firstProperty);
-
-                $this->implementGetIterator($class, $firstProperty);
-
-                $this->implementOffsetExists($class, $firstProperty);
-                $this->implementOffsetGet($class, $firstProperty);
-                $this->implementOffsetSet($class, $firstProperty);
-                $this->implementOffsetUnset($class, $firstProperty);
-
-                $this->implementCount($class, $firstProperty);
 
                 $this->implementPropertyAsArray($class, $firstProperty);
 
@@ -243,240 +234,6 @@ class ArrayPropertyAssembler implements AssemblerInterface
             'return $new;'
         ];
 
-        $body = implode($class::LINE_FEED, $lines);
-
-        $methodGenerator->setBody($body);
-        $class->addMethodFromGenerator($methodGenerator);
-    }
-
-    private function implementCount(ClassGenerator $class, Property $firstProperty)
-    {
-        $methodName = 'count';
-        $class->removeMethod($methodName);
-
-        $methodGenerator = new MethodGenerator($methodName);
-        $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
-        $methodGenerator->setReturnType('int');
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'shortDescription' => 'Count elements of an object',
-                'longDescription' => 'The return value is cast to an integer.',
-                'tags' => [
-                    new Tag\ReturnTag([
-                        'datatype' => 'int',
-                    ]),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/countable.count.php')
-                ]
-            ])
-        );
-
-
-        $lines = [
-            sprintf('$this->%s();', $this->getPropertyAsArrayMethodName($firstProperty->getName())),
-            '',
-            sprintf('return is_array($this->%1$s) ? count($this->%1$s) : 0;', $firstProperty->getName()),
-        ];
-
-        $body = implode($class::LINE_FEED, $lines);
-
-        $methodGenerator->setBody($body);
-        $class->addMethodFromGenerator($methodGenerator);
-    }
-
-    private function implementOffsetExists(ClassGenerator $class, Property $firstProperty)
-    {
-        $methodName = 'offsetExists';
-        $class->removeMethod($methodName);
-
-        $methodGenerator = new MethodGenerator($methodName);
-        $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
-        $methodGenerator->setParameters([['name' => 'offset']]);
-        $methodGenerator->setReturnType('bool');
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'shortDescription' => 'Whether a offset exists',
-                'longDescription' => 'The return value will be casted to boolean if non-boolean was returned.',
-                'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'An offset to check for.'
-                    ),
-                    new Tag\ReturnTag(['bool'], 'true on success or false on failure.'),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetexists.php')
-                ]
-            ])
-        );
-
-        $lines = [
-            sprintf('$this->%s();', $this->getPropertyAsArrayMethodName($firstProperty->getName())),
-            '',
-            sprintf('return is_array($this->%1$s) && isset($this->%1$s[$offset]);', $firstProperty->getName()),
-        ];
-
-        $body = implode($class::LINE_FEED, $lines);
-
-        $methodGenerator->setBody($body);
-        $class->addMethodFromGenerator($methodGenerator);
-    }
-
-    private function implementOffsetGet(ClassGenerator $class, Property $firstProperty)
-    {
-        $methodName = 'offsetGet';
-        $class->removeMethod($methodName);
-
-        $methodGenerator = new MethodGenerator($methodName);
-        $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
-        $methodGenerator->setParameters([['name' => 'offset']]);
-        $methodGenerator->setReturnType(null);
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'shortDescription' => 'Offset to retrieve',
-                'longDescription' => null,
-                'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'The offset to retrieve.'
-                    ),
-                    new Tag\ReturnTag(['mixed'], 'Can return all value types.'),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetget.php')
-                ]
-            ])
-        );
-
-        $lines = [
-            sprintf('$this->%s();', $this->getPropertyAsArrayMethodName($firstProperty->getName())),
-            '',
-            sprintf('return (is_array($this->%1$s) && isset($this->%1$s[$offset]))', $firstProperty->getName()),
-            "\t" . sprintf('? $this->%1$s[$offset]', $firstProperty->getName()),
-            "\t" . ': null;'
-        ];
-
-        $body = implode($class::LINE_FEED, $lines);
-
-        $methodGenerator->setBody($body);
-        $class->addMethodFromGenerator($methodGenerator);
-    }
-
-    private function implementOffsetSet(ClassGenerator $class, Property $firstProperty)
-    {
-        $methodName = 'offsetSet';
-        $class->removeMethod($methodName);
-
-        $methodGenerator = new MethodGenerator($methodName);
-        $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
-        $methodGenerator->setParameters([['name' => 'offset'], ['name' => 'value']]);
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'shortDescription' => 'Offset to set',
-                'longDescription' => null,
-                'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'The offset to assign the value to.'
-                    ),
-                    new Tag\ParamTag(
-                        'value',
-                        ['mixed'],
-                        'The value to set.'
-                    ),
-                    new Tag\ReturnTag(['void']),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetset.php')
-                ]
-            ])
-        );
-
-        $lines = [
-            sprintf('if (!($value instanceof %s)) {', $firstProperty->getType()),
-            "\t" . 'throw new \InvalidArgumentException(',
-            "\t" . "\t" . 'sprintf(',
-            "\t" . "\t" . "\t" . sprintf(
-                '\'The %1$s property can only contain items of type %2$s, %%s given\',',
-                $firstProperty->getName(),
-                $firstProperty->getType()
-            ),
-            "\t" . "\t" . "\t" . 'is_object($value)',
-            "\t" . "\t" . "\t" . "\t" . '? get_class($value)',
-            "\t" . "\t" . "\t" . "\t" . ': sprintf(\'%1$s(%2$s)\', gettype($value), var_export($value, true))',
-            "\t" . "\t" . ')',
-            "\t" . ');',
-            '}',
-            '',
-            sprintf('$this->%s();', $this->getPropertyAsArrayMethodName($firstProperty->getName())),
-            '',
-            'if (is_null($offset)) {',
-            "\t" . sprintf('$this->%s[] = $value;', $firstProperty->getName()),
-            '} else {',
-            "\t" . sprintf('$this->%s[$offset] = $value;', $firstProperty->getName()),
-            '}'
-        ];
-        $body = implode($class::LINE_FEED, $lines);
-
-        $methodGenerator->setBody($body);
-        $class->addMethodFromGenerator($methodGenerator);
-    }
-
-    private function implementOffsetUnset(ClassGenerator $class, Property $firstProperty)
-    {
-        $methodName = 'offsetUnset';
-        $class->removeMethod($methodName);
-
-        $methodGenerator = new MethodGenerator($methodName);
-        $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
-        $methodGenerator->setParameters([['name' => 'offset']]);
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'shortDescription' => 'Offset to unset',
-                'longDescription' => null,
-                'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'The offset to unset.'
-                    ),
-                    new Tag\ReturnTag(['void']),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetunset.php')
-                ]
-            ])
-        );
-
-        $lines = [
-            sprintf('$this->%s();', $this->getPropertyAsArrayMethodName($firstProperty->getName())),
-            '',
-            sprintf('unset($this->%s[$offset]);', $firstProperty->getName()),
-        ];
-        $body = implode($class::LINE_FEED, $lines);
-
-        $methodGenerator->setBody($body);
-        $class->addMethodFromGenerator($methodGenerator);
-    }
-
-    private function implementGetIterator(ClassGenerator $class, Property $firstProperty)
-    {
-        $methodName = 'getIterator';
-        $class->removeMethod($methodName);
-
-        $methodGenerator = new MethodGenerator($methodName);
-        $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
-        $methodGenerator->setReturnType('\ArrayIterator');
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'shortDescription' => 'Retrieve an external iterator',
-                'longDescription' => null,
-                'tags' => [
-                    new Tag\ReturnTag(['\ArrayIterator'], 'An instance of an object implementing <b>Iterator</b>'),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/iteratoraggregate.getiterator.php')
-                ]
-            ])
-        );
-
-        $lines = [
-            sprintf('$this->%s();', $this->getPropertyAsArrayMethodName($firstProperty->getName())),
-            '',
-            sprintf('return new \ArrayIterator($this->%s);', $firstProperty->getName()),
-        ];
         $body = implode($class::LINE_FEED, $lines);
 
         $methodGenerator->setBody($body);
