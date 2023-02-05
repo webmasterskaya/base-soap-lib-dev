@@ -115,7 +115,7 @@ class ArrayTypePatchAssembler implements AssemblerInterface
 
         $lines = [
             sprintf('if (!is_array($this->%s)) {', $firstProperty->getName()),
-            '/** @noinspection PhpInvalidInstanceofInspection */',
+            "\t" . '/** @noinspection PhpInvalidInstanceofInspection */',
             "\t" . sprintf('if ($this->%1$s instanceof %2$s) {', $firstProperty->getName(), $firstProperty->getType()),
             "\t" . "\t" . sprintf('$this->%1$s = [$this->%1$s];', $firstProperty->getName()),
             "\t" . '} else {',
