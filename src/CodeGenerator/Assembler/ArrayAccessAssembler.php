@@ -166,7 +166,7 @@ class ArrayAccessAssembler implements AssemblerInterface
             '}',
             '',
             sprintf('if(!is_array($this->%1$s) && !is_null($this->%1$s)) {', $firstProperty->getName()),
-            "\t" . '/** @noinspection PhpInvalidInstanceofInspection */',
+            "\t" . '/** @noinspection PhpParamsInspection */',
             "\t" . 'throw new \RuntimeException(',
             "\t" . "\t" . 'sprintf(',
             "\t" . "\t" . "\t" . sprintf(
