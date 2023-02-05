@@ -2,15 +2,28 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Phpro\SoapClient\CodeGenerator\Assembler\FluentSetterAssemblerOptions;
+use Phpro\SoapClient\CodeGenerator\Assembler\GetterAssemblerOptions;
+use Phpro\SoapClient\CodeGenerator\Assembler\ImmutableSetterAssemblerOptions;
+use Phpro\SoapClient\CodeGenerator\Assembler\SetterAssemblerOptions;
+
 class ArrayTypePatchAssemblerOptions
 {
     private $getterPatch = false;
 
+    private $getterOptions = null;
+
     private $setterPatch = false;
+
+    private $setterOptions = null;
 
     private $immutableSetterPatch = false;
 
+    private $immutableSetterOptions = null;
+
     private $fluentSetterPatch = false;
+
+    private $fluentSetterOptions = null;
 
     private $iteratorPatch = true;
 
@@ -43,6 +56,25 @@ class ArrayTypePatchAssemblerOptions
     }
 
     /**
+     * @return GetterAssemblerOptions|null
+     */
+    public function getGetterOptions(): ?GetterAssemblerOptions
+    {
+        return $this->getterOptions;
+    }
+
+    /**
+     * @param GetterAssemblerOptions|null $options
+     * @return ArrayTypePatchAssemblerOptions
+     */
+    public function withGetterOptions(GetterAssemblerOptions $options = null): ArrayTypePatchAssemblerOptions
+    {
+        $new = clone $this;
+        $new->getterOptions = $options ?? new GetterAssemblerOptions();
+        return $new;
+    }
+
+    /**
      * @return bool
      */
     public function useSetterPatch(): bool
@@ -58,6 +90,25 @@ class ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->setterPatch = $setterPatch;
+        return $new;
+    }
+
+    /**
+     * @return SetterAssemblerOptions|null
+     */
+    public function getSetterOptions(): ?SetterAssemblerOptions
+    {
+        return $this->setterOptions;
+    }
+
+    /**
+     * @param SetterAssemblerOptions|null $options
+     * @return ArrayTypePatchAssemblerOptions
+     */
+    public function withSetterOptions(SetterAssemblerOptions $options = null): ArrayTypePatchAssemblerOptions
+    {
+        $new = clone $this;
+        $new->setterOptions = $options ?? new SetterAssemblerOptions();
         return $new;
     }
 
@@ -81,6 +132,25 @@ class ArrayTypePatchAssemblerOptions
     }
 
     /**
+     * @return GetterAssemblerOptions|null
+     */
+    public function getImmutableSetterOptions(): ?ImmutableSetterAssemblerOptions
+    {
+        return $this->immutableSetterOptions;
+    }
+
+    /**
+     * @param ImmutableSetterAssemblerOptions|null $options
+     * @return ArrayTypePatchAssemblerOptions
+     */
+    public function withImmutableSetterOptions(ImmutableSetterAssemblerOptions $options = null
+    ): ArrayTypePatchAssemblerOptions {
+        $new = clone $this;
+        $new->immutableSetterOptions = $options ?? new ImmutableSetterAssemblerOptions();
+        return $new;
+    }
+
+    /**
      * @return bool
      */
     public function useFluentSetterPatch(): bool
@@ -96,6 +166,25 @@ class ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->fluentSetterPatch = $fluentSetterPatch;
+        return $new;
+    }
+
+    /**
+     * @return FluentSetterAssemblerOptions|null
+     */
+    public function getFluentSetterOptions(): ?FluentSetterAssemblerOptions
+    {
+        return $this->fluentSetterOptions;
+    }
+
+    /**
+     * @param FluentSetterAssemblerOptions|null $options
+     * @return ArrayTypePatchAssemblerOptions
+     */
+    public function withFluentSetterOptions(FluentSetterAssemblerOptions $options = null
+    ): ArrayTypePatchAssemblerOptions {
+        $new = clone $this;
+        $new->fluentSetterOptions = $options ?? new FluentSetterAssemblerOptions();
         return $new;
     }
 
