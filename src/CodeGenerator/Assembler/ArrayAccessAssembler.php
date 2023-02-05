@@ -181,7 +181,7 @@ class ArrayAccessAssembler implements AssemblerInterface
                 $firstProperty->getName()
             ),
             "\t" . "\t" . ')',
-            "\t" . ')',
+            "\t" . ');',
             '}',
             '',
             'if (is_null($offset)) {',
