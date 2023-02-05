@@ -35,7 +35,7 @@ class ArrayTypePatchAssemblerOptions
      * @param bool $getterPatch
      * @return ArrayTypePatchAssemblerOptions
      */
-    public function withGetterPatch(bool $getterPatch): ArrayTypePatchAssemblerOptions
+    public function withGetterPatch(bool $getterPatch = true): ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->getterPatch = $getterPatch;
@@ -54,7 +54,7 @@ class ArrayTypePatchAssemblerOptions
      * @param bool $setterPatch
      * @return ArrayTypePatchAssemblerOptions
      */
-    public function withSetterPatch(bool $setterPatch): ArrayTypePatchAssemblerOptions
+    public function withSetterPatch(bool $setterPatch = true): ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->setterPatch = $setterPatch;
@@ -73,7 +73,7 @@ class ArrayTypePatchAssemblerOptions
      * @param bool $immutableSetterPatch
      * @return ArrayTypePatchAssemblerOptions
      */
-    public function withImmutableSetterPatch(bool $immutableSetterPatch): ArrayTypePatchAssemblerOptions
+    public function withImmutableSetterPatch(bool $immutableSetterPatch = true): ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->immutableSetterPatch = $immutableSetterPatch;
@@ -92,7 +92,7 @@ class ArrayTypePatchAssemblerOptions
      * @param bool $fluentSetterPatch
      * @return ArrayTypePatchAssemblerOptions
      */
-    public function withFluentSetterPatch(bool $fluentSetterPatch): ArrayTypePatchAssemblerOptions
+    public function withFluentSetterPatch(bool $fluentSetterPatch = true): ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->fluentSetterPatch = $fluentSetterPatch;
@@ -111,7 +111,7 @@ class ArrayTypePatchAssemblerOptions
      * @param bool $iteratorPatch
      * @return ArrayTypePatchAssemblerOptions
      */
-    public function withIteratorPatch(bool $iteratorPatch): ArrayTypePatchAssemblerOptions
+    public function withIteratorPatch(bool $iteratorPatch = true): ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->iteratorPatch = $iteratorPatch;
@@ -130,7 +130,7 @@ class ArrayTypePatchAssemblerOptions
      * @param bool $countablePatch
      * @return ArrayTypePatchAssemblerOptions
      */
-    public function withCountablePatch(bool $countablePatch): ArrayTypePatchAssemblerOptions
+    public function withCountablePatch(bool $countablePatch = true): ArrayTypePatchAssemblerOptions
     {
         $new = clone $this;
         $new->countablePatch = $countablePatch;
