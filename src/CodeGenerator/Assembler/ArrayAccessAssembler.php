@@ -165,8 +165,8 @@ class ArrayAccessAssembler implements AssemblerInterface
             "\t" . ');',
             '}',
             '',
-            sprintf('if(!is_array($this->%1$s) && !is_null($this->%1$s))', $firstProperty->getName()),
-            '{',
+            sprintf('if(!is_array($this->%1$s) && !is_null($this->%1$s)) {', $firstProperty->getName()),
+            "\t" . '/** @noinspection PhpInvalidInstanceofInspection */',
             "\t" . 'throw new \RuntimeException(',
             "\t" . "\t" . 'sprintf(',
             "\t" . "\t" . "\t" . sprintf(
@@ -221,8 +221,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         );
 
         $lines = [
-            sprintf('if(is_array($this->%1$s))', $firstProperty->getName()),
-            '{',
+            sprintf('if(is_array($this->%1$s)) {', $firstProperty->getName()),
             "\t" . sprintf('unset($this->%1$s[$offset]);', $firstProperty->getName()),
             '}',
         ];
