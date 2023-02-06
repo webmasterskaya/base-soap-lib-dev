@@ -172,16 +172,12 @@ class ArrayTypePatchAssembler implements AssemblerInterface
             );
         }
 
-        if ((($options instanceof FluentSetterAssemblerOptions)
-                || ($options instanceof ImmutableSetterAssemblerOptions))
-            && $options->useTypeHints()) {
-            $method->setParameter(['name' => $property->getName()]);
-        }
+        $method->setParameter(['name' => $property->getName()]);
 
         $class->addMethodFromGenerator($method);
     }
 
-    private function replaceDocblockParam(Generator\DocBlockGenerator $docBlock, Property $property)
+    private function replaceDocblockParam(Generator\DocBlockGenerator $docBlock, Property $property): array
     {
         $newDocBlock = [];
 
@@ -231,7 +227,7 @@ class ArrayTypePatchAssembler implements AssemblerInterface
 
     protected function getAsArrayOfMethodName(Property $property): string
     {
-        return Normalizer::generatePropertyMethod('asArrayOf', $property->getName());
+        return Normalizer::normalizeMethodName(sprintf('asArrayOf%s', $property->getName()));
     }
 
     private function applyPropertyTypePatch(Generator\ClassGenerator $class, Property $property)
