@@ -4,14 +4,13 @@ namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
 use Laminas\Code\Generator;
 use Laminas\Code\Generator\DocBlock\Tag\ParamTag;
-use Phpro\SoapClient\CodeGenerator\Assembler;
 use Phpro\SoapClient\CodeGenerator\Context;
 use Phpro\SoapClient\CodeGenerator\LaminasCodeFactory\DocBlockGeneratorFactory;
 use Phpro\SoapClient\CodeGenerator\Model\Property;
 use Phpro\SoapClient\CodeGenerator\Util\Normalizer;
 use Phpro\SoapClient\Exception\AssemblerException;
 
-class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
+class ArrayTypePatchAssembler implements AssemblerInterface
 {
 
     private $options;
@@ -49,41 +48,21 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
         $firstProperty = count($properties) ? current($properties) : null;
 
         try {
-            $this->implementPropertyArrayPatch($class, $firstProperty);
+            $this->implementAsArrayOfMethod($class, $firstProperty);
 
             if ($this->options->useArrayAccessPatch()) {
-                $this->patchMethod($class, $firstProperty, 'offsetExists');
-                $this->patchMethod($class, $firstProperty, 'offsetGet');
-                $this->patchMethod($class, $firstProperty, 'offsetSet');
-                $this->patchMethod($class, $firstProperty, 'offsetUnset');
+                $this->applyAsArrayOfPath($class, $firstProperty, 'offsetExists');
+                $this->applyAsArrayOfPath($class, $firstProperty, 'offsetGet');
+                $this->applyAsArrayOfPath($class, $firstProperty, 'offsetSet');
+                $this->applyAsArrayOfPath($class, $firstProperty, 'offsetUnset');
             }
 
             if ($this->options->useCountablePatch()) {
-                $this->patchMethod($class, $firstProperty, 'count');
+                $this->applyAsArrayOfPath($class, $firstProperty, 'count');
             }
 
             if ($this->options->useIteratorPatch()) {
-                $this->patchMethod($class, $firstProperty, 'getIterator');
-            }
-
-            if ($this->options->useGetterPatch()) {
-                $getterName = '';
-                $this->patchMethod($class, $firstProperty, $getterName);
-            }
-
-            if ($this->options->useSetterPatch()) {
-                $setterName = '';
-                $this->patchMethod($class, $firstProperty, $setterName);
-            }
-
-            if ($this->options->useFluentSetterPatch()) {
-                $fluentSetterName = '';
-                $this->patchMethod($class, $firstProperty, $fluentSetterName);
-            }
-
-            if ($this->options->useImmutableSetterPatch()) {
-                $immutableSetterName = '';
-                $this->patchMethod($class, $firstProperty, $immutableSetterName);
+                $this->applyAsArrayOfPath($class, $firstProperty, 'getIterator');
             }
         } catch (\Exception $e) {
             throw AssemblerException::fromException($e);
@@ -103,51 +82,55 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
         }
 
         try {
-            $this->patchTypeProperty($class, $property);
+            $this->applyPropertyTypePatch($class, $property);
 
             if ($this->options->useGetterPatch()) {
-                $getterAssembler = new Assembler\GetterAssembler($this->options->getGetterOptions());
+                $getterAssembler = new GetterAssembler($this->options->getGetterOptions());
                 if ($getterAssembler->canAssemble($context)) {
                     $getterAssembler->assemble($context);
-                    $this->patchGetter($class, $property);
+                    $this->applyGetterPatch($class, $property);
                 }
             }
 
-
-            if ($this->options->useSetterPatch()
-                || $this->options->useFluentSetterPatch()
-                || $this->options->useImmutableSetterPatch()) {
-                $this->implementSetterNormalizer($class, $property);
-
-                if ($this->options->useSetterPatch()) {
-                    $setterAssembler = new Assembler\SetterAssembler($this->options->getSetterOptions());
-                    if ($setterAssembler->canAssemble($context)) {
-                        $setterAssembler->assemble($context);
-                        $methodName = Normalizer::generatePropertyMethod('set', $property->getName());
-                        $this->patchSetter($class, $property, $methodName, $this->options->getSetterOptions());
-                    }
-                }
-
-                if ($this->options->useFluentSetterPatch()) {
-                    $fluentSetterAssembler = new Assembler\FluentSetterAssembler(
-                        $this->options->getFluentSetterOptions()
+            if (!$this->options->useFluentSetterPatch()
+                && !$this->options->useImmutableSetterPatch()) {
+                $setterAssembler = new SetterAssembler($this->options->getSetterOptions());
+                if ($setterAssembler->canAssemble($context)) {
+                    $setterAssembler->assemble($context);
+                    $this->applySetterPatch(
+                        $class,
+                        $property,
+                        'set',
+                        $this->options->getSetterOptions() ?? new SetterAssemblerOptions()
                     );
-                    if ($fluentSetterAssembler->canAssemble($context)) {
-                        $fluentSetterAssembler->assemble($context);
-                        $methodName = Normalizer::generatePropertyMethod('set', $property->getName());
-                        $this->patchSetter($class, $property, $methodName, $this->options->getFluentSetterOptions());
-                    }
                 }
+            }
 
-                if ($this->options->useImmutableSetterPatch()) {
-                    $immutableSetterAssembler = new Assembler\ImmutableSetterAssembler(
-                        $this->options->getImmutableSetterOptions()
+            if ($this->options->useFluentSetterPatch()) {
+                $fluentSetterAssembler = new FluentSetterAssembler($this->options->getFluentSetterOptions());
+                if ($fluentSetterAssembler->canAssemble($context)) {
+                    $fluentSetterAssembler->assemble($context);
+                    $this->applySetterPatch(
+                        $class,
+                        $property,
+                        'set',
+                        $this->options->getFluentSetterOptions() ?? new FluentSetterAssemblerOptions()
                     );
-                    if ($immutableSetterAssembler->canAssemble($context)) {
-                        $immutableSetterAssembler->assemble($context);
-                        $methodName = Normalizer::generatePropertyMethod('with', $property->getName());
-                        $this->patchSetter($class, $property, $methodName, $this->options->getImmutableSetterOptions());
-                    }
+                }
+            }
+
+            if ($this->options->useImmutableSetterPatch()) {
+                $immutableSetterAssembler = new ImmutableSetterAssembler(
+                    $this->options->getImmutableSetterOptions()
+                );
+                if ($immutableSetterAssembler->canAssemble($context)) {
+                    $immutableSetterAssembler->assemble($context);
+                    $this->applySetterPatch(
+                        $class,
+                        $property,
+                        'with',
+                        $this->options->getImmutableSetterOptions() ?? new ImmutableSetterAssemblerOptions()
+                    );
                 }
             }
         } catch (\Exception $e) {
@@ -158,61 +141,71 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
     /**
      * @param Generator\ClassGenerator $class
      * @param Property $property
-     * @param string $methodName
-     * @param Assembler\SetterAssemblerOptions|Assembler\FluentSetterAssemblerOptions|Assembler\ImmutableSetterAssemblerOptions $options
+     * @param string $prefix
+     * @param SetterAssemblerOptions|FluentSetterAssemblerOptions|ImmutableSetterAssemblerOptions $options
      * @return void
      */
-    private function patchSetter(Generator\ClassGenerator $class, Property $property, string $methodName, $options)
+    private function applySetterPatch(Generator\ClassGenerator $class, Property $property, string $prefix, $options)
     {
-        $normalizerMethodName = Normalizer::generatePropertyMethod('normalize', $property->getName());
+        $methodName = Normalizer::generatePropertyMethod($prefix, $property->getName());
 
         if (!$class->hasMethod($methodName)) {
             return;
         }
+
         $method = $class->getMethod($methodName);
         $class->removeMethod($method->getName());
 
         $lines = [
-            sprintf('$%1$s = $this->%2$s($%1$s);', $property->getName(), $normalizerMethodName),
+            $this->getSetterPatchCode($class, $property),
             '',
             $method->getBody()
         ];
+
         $body = implode($class::LINE_FEED, $lines);
         $method->setBody($body);
 
         if ($options && $options->useDocBlocks()) {
             $docBlock = $method->getDocBlock();
-            $newDocBlock = [];
-
-            $newDocBlock['shortDescription'] = $docBlock->getShortDescription();
-            $newDocBlock['longDescription'] = $docBlock->getLongDescription();
-
-            $tags = $docBlock->getTags();
-            foreach ($tags as $tag) {
-                if ($tag->getName() != 'param') {
-                    $newDocBlock['tags'][] = $tag;
-                }
-            }
-
-            $newDocBlock['tags'][] = new ParamTag(
-                $property->getName(),
-                [$property->getType(), sprintf('%s[]', $property->getType())]
+            $method->setDocBlock(
+                Generator\DocBlockGenerator::fromArray($this->replaceDocblockParam($docBlock, $property))
             );
-
-            $method->setDocBlock(Generator\DocBlockGenerator::fromArray($newDocBlock));
         }
 
-        if (($options instanceof Assembler\FluentSetterAssemblerOptions && $options->useTypeHints())
-            || ($options instanceof Assembler\ImmutableSetterAssemblerOptions && $options->useTypeHints())) {
+        if ((($options instanceof FluentSetterAssemblerOptions)
+                || ($options instanceof ImmutableSetterAssemblerOptions))
+            && $options->useTypeHints()) {
             $method->setParameter(['name' => $property->getName()]);
         }
 
         $class->addMethodFromGenerator($method);
     }
 
-    private function implementPropertyArrayPatch(Generator\ClassGenerator $class, Property $property)
+    private function replaceDocblockParam(Generator\DocBlockGenerator $docBlock, Property $property)
     {
-        $methodName = $this->getPatchPropertyMethodName($property->getName());
+        $newDocBlock = [];
+
+        $newDocBlock['shortDescription'] = $docBlock->getShortDescription();
+        $newDocBlock['longDescription'] = $docBlock->getLongDescription();
+
+        $tags = $docBlock->getTags();
+        foreach ($tags as $tag) {
+            if ($tag->getName() != 'param') {
+                $newDocBlock['tags'][] = $tag;
+            }
+        }
+
+        $newDocBlock['tags'][] = new ParamTag(
+            $property->getName(),
+            [$property->getType(), sprintf('%s[]', $property->getType())]
+        );
+
+        return $newDocBlock;
+    }
+
+    private function implementAsArrayOfMethod(Generator\ClassGenerator $class, Property $property)
+    {
+        $methodName = $this->getAsArrayOfMethodName($property);
         $class->removeMethod($methodName);
 
         $methodGenerator = new Generator\MethodGenerator($methodName);
@@ -236,14 +229,12 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
         $class->addMethodFromGenerator($methodGenerator);
     }
 
-    protected function getPatchPropertyMethodName(string $property): string
+    protected function getAsArrayOfMethodName(Property $property): string
     {
-        return Normalizer::normalizeMethodName(
-            lcfirst(Normalizer::normalizeProperty($property)) . 'ArrayPatch'
-        );
+        return Normalizer::generatePropertyMethod('asArrayOf', $property->getName());
     }
 
-    private function patchTypeProperty(Generator\ClassGenerator $class, Property $property)
+    private function applyPropertyTypePatch(Generator\ClassGenerator $class, Property $property)
     {
         $class->removeProperty($property->getName());
         $class->addPropertyFromGenerator(
@@ -263,7 +254,7 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
         );
     }
 
-    private function patchMethod(Generator\ClassGenerator $class, Property $property, string $methodName)
+    private function applyAsArrayOfPath(Generator\ClassGenerator $class, Property $property, string $methodName)
     {
         if (!$class->hasMethod($methodName)) {
             return;
@@ -273,7 +264,7 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
         $class->removeMethod($method->getName());
 
         $lines = [
-            sprintf('$this->%s();', $this->getPatchPropertyMethodName($property->getName())),
+            sprintf('$this->%s();', $this->getAsArrayOfMethodName($property)),
             '',
             $method->getBody()
         ];
@@ -284,49 +275,48 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
         $class->addMethodFromGenerator($method);
     }
 
-    private function patchGetter(Generator\ClassGenerator $class, Property $property)
+    private function applyGetterPatch(Generator\ClassGenerator $class, Property $property)
     {
-        $methodName = Normalizer::generatePropertyMethod('get', $property->getName());
+        if (!$this->options->getGetterOptions()->useBoolGetters()) {
+            $prefix = 'get';
+        } else {
+            $prefix = $property->getType() === 'bool' ? 'is' : 'get';
+        }
+        $methodName = Normalizer::generatePropertyMethod($prefix, $property->getName());
 
         if (!$class->hasMethod($methodName)) {
             return;
         }
 
-        $this->patchMethod($class, $property, $methodName);
+        $this->applyAsArrayOfPath($class, $property, $methodName);
 
-        $method = $class->getMethod($methodName);
+        if ($this->options->getGetterOptions()->useReturnType()
+            || $this->options->getGetterOptions()->useDocBlocks()) {
+            $method = $class->getMethod($methodName);
+            $class->removeMethod($method->getName());
 
-        $class->removeMethod($method->getName());
+            if ($this->options->getGetterOptions()->useReturnType()) {
+                $method->setReturnType('array');
+            }
 
-        if ($this->options->getGetterOptions()->useReturnType()) {
-            $method->setReturnType('array');
-        }
-
-        if ($this->options->getGetterOptions()->useDocBlocks()) {
-            $method->setDocBlock(
-                DocBlockGeneratorFactory::fromArray([
-                    'tags' => [
-                        [
-                            'name' => 'return',
-                            'description' => sprintf('%s[]', $property->getType()),
+            if ($this->options->getGetterOptions()->useDocBlocks()) {
+                $method->setDocBlock(
+                    DocBlockGeneratorFactory::fromArray([
+                        'tags' => [
+                            new Generator\DocBlock\Tag\ReturnTag(
+                                [sprintf('%s[]', $property->getType())]
+                            ),
                         ],
-                    ],
-                ])
-            );
-        }
+                    ])
+                );
+            }
 
-        $class->addMethodFromGenerator($method);
+            $class->addMethodFromGenerator($method);
+        }
     }
 
-    private function implementSetterNormalizer(Generator\ClassGenerator $class, Property $property)
+    private function getSetterPatchCode(Generator\ClassGenerator $class, Property $property): string
     {
-        $methodName = Normalizer::generatePropertyMethod('normalize', $property->getName());
-        $class->removeMethod($methodName);
-
-        $methodGenerator = new Generator\MethodGenerator($methodName);
-        $methodGenerator->setVisibility(Generator\MethodGenerator::VISIBILITY_PRIVATE);
-        $methodGenerator->setParameters([['name' => $property->getName()]]);
-
         $lines = [
             sprintf('if (!is_array($%s)) {', $property->getName()),
             "\t" . sprintf('$%1$s = [$%1$s];', $property->getName()),
@@ -350,14 +340,9 @@ class ArrayTypePatchAssembler implements Assembler\AssemblerInterface
             "\t" . "\t" . "\t" . ')',
             "\t" . "\t" . ' );',
             "\t" . '}',
-            '}',
-            '',
-            sprintf('return $%1$s;', $property->getName())
+            '}'
         ];
 
-        $body = implode($class::LINE_FEED, $lines);
-
-        $methodGenerator->setBody($body);
-        $class->addMethodFromGenerator($methodGenerator);
+        return implode($class::LINE_FEED, $lines);
     }
 }
