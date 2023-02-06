@@ -2,18 +2,62 @@
 
 Ассемблер кода представляет собой прослойку над [laminas-code](https://github.com/laminas/laminas-code).
 
-Описание основных ассемблеров кода читайте [тут](https://github.com/phpro/soap-client/blob/master/docs/code-generation/assemblers.md).
-Как создавать свои собственные генераторы, читайте [тут](https://github.com/phpro/soap-client/blob/master/docs/code-generation/assemblers.md#creating-your-own-assembler).
+Как создавать свои собственные ассемблеры, читайте [тут](https://github.com/phpro/soap-client/blob/master/docs/code-generation/assemblers.md#creating-your-own-assembler).
 
 # Список генераторов
 
-- [ArrayPropertyAssembler](#arraypropertyassembler)
+- [ArrayAccessAssembler](#arrayaccessassembler)
+- [IteratorAssembler](#iteratorassembler)
+- [CountableAssembler](#countableassembler)
+- [ArrayTypePatchAssembler](#arraytypepatchassembler)
+- [ArrayPropertyPatchAssembler](#arraypropertypatchassembler)
+- [ArrayPropertyAssembler](#arraypropertyassembler) `deprecated`
+
+## ArrayAccessAssembler
+
+`ArrayAccessAssembler` сгенерируеи класс SOAP-типа, который будет реализовать интерфейс `\ArrayAccess`.
+Применяется к первому (подразумевается, что к единственному) свойству объекта, обеспечивая доступ к объекту, как к массиву.
+
+## IteratorAssembler
+
+IteratorAssembler doc
+
+
+
+## CountableAssembler
+
+CountableAssembler doc
+
+## ArrayTypePatchAssembler
+
+ArrayTypePatchAssembler doc
+
+## ArrayPropertyPatchAssembler
+
+ArrayPropertyPatchAssembler doc
+
 
 ## ArrayPropertyAssembler
 
+> **Warning**
+> Не используйте этот ассемблер! Мы отказываемся от его использования из-за отсутсвия гибкости и недостаточной функциональности.
+> Вместо этого используйте различные комбинации из - [IteratorAssembler](#iteratorassembler), [ArrayAccessAssembler](#arrayaccessassembler), [CountableAssembler](#countableassembler), [ArrayTypePatchAssembler](#arraytypepatchassembler), [ArrayPropertyPatchAssembler](#arraypropertypatchassembler)
+ 
 `ArrayPropertyAssembler` хорошо подходит для SOAP типов данных, которые содержат повторяющееся перечисление других типов.
 Этот ассемблер даёт возможность работать с такими перечислениями, как с обычным php массивом.
 Сгенерированный класс типа будет реализовать интерфейсы `\IteratorAggregate`, `\ArrayAccess`, `\Countable`
+
+Пример вызова генератора:
+```php
+/**
+* Для всех типов, название которых начинается с фразы `ArrayOf` применяем `ArrayPropertyAssembler`
+ */
+    //...
+    ->addRule(
+            new Rules\AssembleRule(new ArrayAccessAssembler()),
+        );
+    //...
+```
 
 Пример XSD схемы:
 ```xml
