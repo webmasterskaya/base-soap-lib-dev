@@ -63,16 +63,8 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator->setReturnType('bool');
         $methodGenerator->setDocBlock(
             DocBlockGenerator::fromArray([
-                'shortDescription' => 'Whether a offset exists',
-                'longDescription' => 'The return value will be casted to boolean if non-boolean was returned.',
                 'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'An offset to check for.'
-                    ),
-                    new Tag\ReturnTag(['bool'], 'true on success or false on failure.'),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetexists.php')
+                    new Tag\GenericTag('inheritDoc')
                 ]
             ])
         );
