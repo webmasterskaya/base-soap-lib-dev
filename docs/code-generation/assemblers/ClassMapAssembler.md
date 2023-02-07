@@ -8,7 +8,8 @@
 
 ## Пример запуска генератора:
 ```php
-    ->setClassMapName('MyClassMapCollection') // 
+    //...
+    ->setClassMapName('MyClassMapCollection')
     ->setClassMapNamespace('Vendor\Package')
     ->setClassMapDestination('./src')
     /**
