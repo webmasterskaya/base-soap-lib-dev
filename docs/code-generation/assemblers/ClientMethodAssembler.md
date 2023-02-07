@@ -1,0 +1,3 @@
+# ClientMethodAssembler
+
+> Документация скоро появится

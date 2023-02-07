@@ -1,0 +1,3 @@
+# FluentSetterAssembler
+
+> Документация скоро появится

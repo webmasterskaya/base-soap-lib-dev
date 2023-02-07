@@ -1,0 +1,3 @@
+# ImmutableSetterAssembler
+
+> Документация скоро появится
