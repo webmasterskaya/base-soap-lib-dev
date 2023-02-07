@@ -86,16 +86,8 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator->setReturnType(null);
         $methodGenerator->setDocBlock(
             DocBlockGenerator::fromArray([
-                'shortDescription' => 'Offset to retrieve',
-                'longDescription' => null,
                 'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'The offset to retrieve.'
-                    ),
-                    new Tag\ReturnTag(['mixed'], 'Can return all value types.'),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetget.php')
+                    new Tag\GenericTag('inheritDoc')
                 ]
             ])
         );
@@ -122,21 +114,8 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator->setParameters([['name' => 'offset'], ['name' => 'value']]);
         $methodGenerator->setDocBlock(
             DocBlockGenerator::fromArray([
-                'shortDescription' => 'Offset to set',
-                'longDescription' => null,
                 'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'The offset to assign the value to.'
-                    ),
-                    new Tag\ParamTag(
-                        'value',
-                        ['mixed'],
-                        'The value to set.'
-                    ),
-                    new Tag\ReturnTag(['void']),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetset.php')
+                    new Tag\GenericTag('inheritDoc')
                 ]
             ])
         );
@@ -198,16 +177,8 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator->setParameters([['name' => 'offset']]);
         $methodGenerator->setDocBlock(
             DocBlockGenerator::fromArray([
-                'shortDescription' => 'Offset to unset',
-                'longDescription' => null,
                 'tags' => [
-                    new Tag\ParamTag(
-                        'offset',
-                        ['mixed'],
-                        'The offset to unset.'
-                    ),
-                    new Tag\ReturnTag(['void']),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/arrayaccess.offsetunset.php')
+                    new Tag\GenericTag('inheritDoc')
                 ]
             ])
         );
