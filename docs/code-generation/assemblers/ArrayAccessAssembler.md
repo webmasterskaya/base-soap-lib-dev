@@ -10,7 +10,7 @@
 ## Пример запуска генератора:
 ```php
     //...
-    ->addRule(new Rules\AssembleRule(new ArrayPropertyAssembler()));
+    ->addRule(new Rules\AssembleRule(new ArrayAccessAssembler()));
     //...
 ```
 ## Пример XSD схемы:
