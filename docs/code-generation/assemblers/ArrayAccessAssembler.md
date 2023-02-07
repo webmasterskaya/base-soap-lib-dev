@@ -13,6 +13,20 @@
     ->addRule(new Rules\AssembleRule(new ArrayPropertyAssembler()));
     //...
 ```
+## Пример XSD схемы:
+```xml
+<!-- -->
+<xs:complexType name="ArrayOfBooks">
+    <xs:sequence>
+        <xs:element name="Book"
+                    type="tns:Book"
+                    nillable="true"
+                    minOccurs="0"
+                    maxOccurs="unbounded"/>
+    </xs:sequence>
+</xs:complexType>
+<!-- -->
+```
 
 ## Пример сгенерированного кода:
 ```php
