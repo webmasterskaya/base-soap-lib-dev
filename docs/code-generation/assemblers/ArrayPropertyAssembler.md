@@ -2,13 +2,13 @@
 
 > **Warning**
 > Не используйте этот ассемблер! Мы отказываемся от его использования из-за отсутсвия гибкости и недостаточной функциональности.
-> Вместо этого используйте различные комбинации из - [IteratorAssembler](#iteratorassembler), [ArrayAccessAssembler](#arrayaccessassembler), [CountableAssembler](#countableassembler), [ArrayTypePatchAssembler](#arraytypepatchassembler), [ArrayPropertyPatchAssembler](#arraypropertypatchassembler)
+> Вместо этого используйте различные комбинации из - [IteratorAssembler](IteratorAssembler.md), [ArrayAccessAssembler](ArrayAccessAssembler.md), [CountableAssembler](CountableAssembler.md), [ArrayTypePatchAssembler](ArrayTypePatchAssembler.md), [ArrayPropertyPatchAssembler](ArrayPropertyPatchAssembler.md)
 
 `ArrayPropertyAssembler` хорошо подходит для SOAP типов данных, которые содержат повторяющееся перечисление других типов.
 Этот ассемблер даёт возможность работать с такими перечислениями, как с обычным php массивом.
 Сгенерированный класс типа будет реализовать интерфейсы `\IteratorAggregate`, `\ArrayAccess`, `\Countable`
 
-Пример запуска генератора:
+## Пример запуска генератора:
 ```php
 /**
 * Для всех типов, название которых начинается с фразы `ArrayOf` применяем `ArrayPropertyAssembler`
@@ -25,7 +25,7 @@
     //...
 ```
 
-Пример XSD схемы:
+## Пример XSD схемы:
 ```xml
 <!-- -->
 <xs:complexType name="ArrayOfBooks">
@@ -40,7 +40,7 @@
 <!-- -->
 ```
 
-Пример сгенерированног кода:
+## Пример сгенерированног кода:
 ```php
 use IteratorAggregate;
 use ArrayAccess;
