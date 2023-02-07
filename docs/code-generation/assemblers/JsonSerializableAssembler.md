@@ -1,0 +1,3 @@
+# JsonSerializableAssembler
+
+> Документация скоро появится
