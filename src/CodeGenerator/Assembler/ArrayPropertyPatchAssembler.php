@@ -43,8 +43,8 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
 
         if ($typeProperty) {
             $patch = $this->getSetterPatchCode($class, $property, $typeProperty);
-            $this->applySetterPatch($class, $property, 'set', $patch);
-            $this->applySetterPatch($class, $property, 'with', $patch);
+            $this->applySetterPatch($class, $property, $typeProperty, 'set', $patch);
+            $this->applySetterPatch($class, $property, $typeProperty, 'with', $patch);
         }
     }
 
@@ -55,7 +55,7 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
      * @param string $code
      * @return void
      */
-    private function applySetterPatch(Generator\ClassGenerator $class, Property $property, string $prefix, string $code)
+    private function applySetterPatch(Generator\ClassGenerator $class, Property $property, Property $typeProperty, string $prefix, string $code)
     {
         $methodName = Normalizer::generatePropertyMethod($prefix, $property->getName());
 
@@ -65,6 +65,8 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
 
         $method = $class->getMethod($methodName);
         $class->removeMethod($method->getName());
+        $class->addUse($property->getType());
+        $class->addUse($typeProperty->getType());
 
         $lines = [
             $code,
@@ -78,7 +80,7 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
         $docBlock = $method->getDocBlock();
         if ($docBlock->getTags()) {
             $method->setDocBlock(
-                Generator\DocBlockGenerator::fromArray($this->replaceDocblockParam($docBlock, $property))
+                Generator\DocBlockGenerator::fromArray($this->replaceDocblockParam($docBlock, $property, $typeProperty))
             );
         }
 
@@ -86,7 +88,7 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
         $class->addMethodFromGenerator($method);
     }
 
-    private function replaceDocblockParam(Generator\DocBlockGenerator $docBlock, Property $property): array
+    private function replaceDocblockParam(Generator\DocBlockGenerator $docBlock, Property $property, Property $typeProperty): array
     {
         $newDocBlock = [];
 
@@ -102,7 +104,7 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
 
         $newDocBlock['tags'][] = new ParamTag(
             $property->getName(),
-            [$property->getType(), sprintf('%s[]', $property->getType())]
+            [Normalizer::getClassNameFromFQN($property->getType()), sprintf('%s[]', Normalizer::getClassNameFromFQN($typeProperty->getType()))]
         );
 
         return $newDocBlock;
@@ -139,8 +141,8 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
     ): string {
         $propertyVarName = lcfirst(Normalizer::getClassNameFromFQN($property->getType()));
         $lines = [
-            sprintf('if (!($%1$s instanceof %2$s)) {', $property->getName(), $property->getType()),
-            "\t" . sprintf('$%1$s = new %2$s();', $propertyVarName, $property->getType()),
+            sprintf('if (!($%1$s instanceof %2$s)) {', $property->getName(), Normalizer::getClassNameFromFQN($property->getType())),
+            "\t" . sprintf('$%1$s = new %2$s();', $propertyVarName, Normalizer::getClassNameFromFQN($property->getType())),
             "\t" . sprintf('$%1$s->%2$s($%3$s);', $propertyVarName, $typeProperty->setterName(), $property->getName()),
             "\t" . sprintf('$%1$s = $%2$s;', $property->getName(), $propertyVarName),
             '}'
