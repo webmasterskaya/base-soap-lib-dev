@@ -2,6 +2,9 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Laminas\Code\Generator\DocBlock\Tag\ParamTag;
+use Laminas\Code\Generator\DocBlock\Tag\ReturnTag;
+use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\MethodGenerator;
 use Phpro\SoapClient\CodeGenerator\Assembler\FluentSetterAssemblerOptions;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
@@ -50,7 +53,6 @@ class FluentSetterAssembler implements AssemblerInterface
 
             $methodGenerator = new MethodGenerator($methodName);
             $methodGenerator->setParameters([$parameterOptions]);
-            $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
             $methodGenerator->setBody(
                 sprintf(
                     '$this->%1$s = $%1$s;%2$sreturn $this;',
@@ -63,17 +65,9 @@ class FluentSetterAssembler implements AssemblerInterface
             }
             if ($this->options->useDocBlocks()) {
                 $methodGenerator->setDocBlock(
-                    DocBlockGeneratorFactory::fromArray([
-                        'tags' => [
-                            [
-                                'name' => 'param',
-                                'description' => sprintf('%s $%s', $property->getType(), $property->getName()),
-                            ],
-                            [
-                                'name' => 'return',
-                                'description' => '$this',
-                            ],
-                        ],
+                    new DocBlockGenerator(tags: [
+                        new ParamTag(description: sprintf('%s $%s', $property->getType(), $property->getName())),
+                        new ReturnTag(description: '$this')
                     ])
                 );
             }

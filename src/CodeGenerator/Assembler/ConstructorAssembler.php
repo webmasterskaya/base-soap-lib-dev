@@ -2,6 +2,7 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\MethodGenerator;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\CodeGenerator\Context\TypeContext;
@@ -62,13 +63,8 @@ class ConstructorAssembler implements AssemblerInterface
     private function assembleConstructor(Type $type): MethodGenerator
     {
         $body = [];
-        $constructor = MethodGenerator::fromArray([
-            'name' => '__construct',
-            'visibility' => MethodGenerator::VISIBILITY_PUBLIC,
-        ]);
-        $docblock = DocBlockGeneratorFactory::fromArray([
-            'shortdescription' => 'Constructor'
-        ]);
+        $constructor = new MethodGenerator('__construct');
+        $docblock = new DocBlockGenerator('Constructor');
 
         foreach ($type->getProperties() as $property) {
             $body[] = sprintf('$this->%1$s = $%1$s;', $property->getName());

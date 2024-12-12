@@ -167,9 +167,7 @@ class ArrayTypePatchAssembler implements AssemblerInterface
 
         if ($options && $options->useDocBlocks()) {
             $docBlock = $method->getDocBlock();
-            $method->setDocBlock(
-                Generator\DocBlockGenerator::fromArray($this->replaceDocblockParam($docBlock, $property))
-            );
+            $method->setDocBlock(new Generator\DocBlockGenerator(...$this->replaceDocblockParam($docBlock, $property)));
         }
 
         $method->setParameter(['name' => $property->getName()]);
@@ -234,19 +232,10 @@ class ArrayTypePatchAssembler implements AssemblerInterface
     {
         $class->removeProperty($property->getName());
         $class->addPropertyFromGenerator(
-            Generator\PropertyGenerator::fromArray([
-                'name' => $property->getName(),
-                'visibility' => Generator\PropertyGenerator::VISIBILITY_PRIVATE,
-                'omitdefaultvalue' => true,
-                'docblock' => DocBlockGeneratorFactory::fromArray([
-                    'tags' => [
-                        [
-                            'name' => 'var',
-                            'description' => sprintf('%s[]', $property->getType()),
-                        ],
-                    ]
-                ])
-            ])
+            (new Generator\PropertyGenerator($property->getName()))
+                ->setVisibility(Generator\PropertyGenerator::VISIBILITY_PRIVATE)
+                ->setDocBlock(new Generator\DocBlockGenerator(tags: [new Generator\DocBlock\Tag\VarTag(description: sprintf('%s[]', $property->getType()))]))
+                ->omitDefaultValue(true)
         );
     }
 

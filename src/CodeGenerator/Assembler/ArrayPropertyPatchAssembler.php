@@ -10,18 +10,18 @@ use Phpro\SoapClient\CodeGenerator\Context;
 use Phpro\SoapClient\CodeGenerator\Model\Property;
 use Phpro\SoapClient\CodeGenerator\Model\Type;
 use Phpro\SoapClient\CodeGenerator\Util\Normalizer;
-use Phpro\SoapClient\Exception\MetadataException;
-use Phpro\SoapClient\Soap\Engine\Metadata\MetadataInterface;
+use Soap\Engine\Exception\MetadataException;
+use Soap\Engine\Metadata\Metadata;
 
 class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
 {
 
     /**
-     * @var MetadataInterface
+     * @var Metadata
      */
     private $metadata;
 
-    public function __construct(MetadataInterface $metadata)
+    public function __construct(Metadata $metadata)
     {
         $this->metadata = $metadata;
     }
@@ -115,7 +115,7 @@ class ArrayPropertyPatchAssembler implements Assembler\AssemblerInterface
         $property = $context->getProperty();
 
         try {
-            $foundPropertyType = $this->metadata->getTypes()->fetchOneByName(
+            $foundPropertyType = $this->metadata->getTypes()->fetchFirstByName(
                 Normalizer::getClassNameFromFQN($property->getType())
             );
         } catch (MetadataException $e) {

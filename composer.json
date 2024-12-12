@@ -1,16 +1,14 @@
 {
 	"name": "webmasterskaya/base-soap-lib-dev",
-	"description": "Набор инструментов для генерации кода и разработки PHP-SOAP приложения, совместимый с PHP 7.1",
+	"description": "Набор инструментов для генерации кода и разработки PHP-SOAP приложения",
 	"type": "library",
 	"license": "MIT",
 	"require": {
-		"php": ">=7.1"
-	},
-	"require-dev": {
-		"phpro/soap-client": "~v1",
-		"laminas/laminas-code": "~3.1.0",
-        "webmasterskaya/base-soap-lib": "^0.0.2"
-	},
+        "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
+        "phpro/soap-client": "~v3",
+        "laminas/laminas-code": "^4.14.0",
+        "webmasterskaya/base-soap-lib": "^1.0"
+    },
 	"autoload": {
 		"psr-4": {
 			"Webmasterskaya\\Soap\\Base\\Dev\\": "src/"
