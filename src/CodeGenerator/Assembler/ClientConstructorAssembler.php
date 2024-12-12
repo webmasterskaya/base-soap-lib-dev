@@ -30,15 +30,17 @@ class ClientConstructorAssembler extends \Phpro\SoapClient\CodeGenerator\Assembl
         $class = $context->getClass();
         try {
             $caller = $this->generateClassNameAndAddImport(CallerInterface::class, $class);
+            $class->removeProperty('caller');
             $class->addPropertyFromGenerator(
                 (new PropertyGenerator(
                     name: 'caller',
                     flags: AbstractMemberGenerator::FLAG_PRIVATE,
-                    type: TypeGenerator::fromTypeString($caller)
+                    type: TypeGenerator::fromTypeString(CallerInterface::class)
                 ))
                     ->setDocBlock(new DocBlockGenerator(tags: [new VarTag(description: $caller)]))
                     ->omitDefaultValue(true)
             );
+            $class->removeMethod('__construct');
             $class->addMethodFromGenerator(
                 (new MethodGenerator(
                     name: '__construct',
