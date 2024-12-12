@@ -61,13 +61,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
         $methodGenerator->setParameters([['name' => 'offset']]);
         $methodGenerator->setReturnType('bool');
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'tags' => [
-                    new Tag\GenericTag('inheritDoc')
-                ]
-            ])
-        );
+        $methodGenerator->setDocBlock(new DocBlockGenerator(tags: [new Tag\GenericTag('inheritDoc')]));
 
         $methodGenerator->setBody(
             sprintf('return is_array($this->%1$s) && isset($this->%1$s[$offset]);', $firstProperty->getName())
@@ -84,13 +78,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
         $methodGenerator->setParameters([['name' => 'offset']]);
         $methodGenerator->setReturnType(null);
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'tags' => [
-                    new Tag\GenericTag('inheritDoc')
-                ]
-            ])
-        );
+        $methodGenerator->setDocBlock(new DocBlockGenerator(tags: [new Tag\GenericTag('inheritDoc')]));
 
         $lines = [
             sprintf('return (is_array($this->%1$s) && isset($this->%1$s[$offset]))', $firstProperty->getName()),
@@ -112,13 +100,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator = new MethodGenerator($methodName);
         $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
         $methodGenerator->setParameters([['name' => 'offset'], ['name' => 'value']]);
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'tags' => [
-                    new Tag\GenericTag('inheritDoc')
-                ]
-            ])
-        );
+        $methodGenerator->setDocBlock(new DocBlockGenerator(tags: [new Tag\GenericTag('inheritDoc')]));
 
         $lines = [
             sprintf('if (!($value instanceof %s)) {', $firstProperty->getType()),
@@ -175,13 +157,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator = new MethodGenerator($methodName);
         $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
         $methodGenerator->setParameters([['name' => 'offset']]);
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'tags' => [
-                    new Tag\GenericTag('inheritDoc')
-                ]
-            ])
-        );
+        $methodGenerator->setDocBlock(new DocBlockGenerator(tags: [new Tag\GenericTag('inheritDoc')]));
 
         $lines = [
             sprintf('if(is_array($this->%1$s)) {', $firstProperty->getName()),

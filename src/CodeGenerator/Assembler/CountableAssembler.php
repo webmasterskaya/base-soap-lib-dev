@@ -48,21 +48,18 @@ class CountableAssembler implements AssemblerInterface
         $methodName = 'count';
         $class->removeMethod($methodName);
 
-        $methodGenerator = new MethodGenerator($methodName);
-        $methodGenerator->setVisibility(MethodGenerator::VISIBILITY_PUBLIC);
-        $methodGenerator->setReturnType('int');
-        $methodGenerator->setDocBlock(
-            DocBlockGenerator::fromArray([
-                'shortDescription' => 'Count elements of an object',
-                'longDescription' => 'The return value is cast to an integer.',
-                'tags' => [
-                    new Tag\ReturnTag([
-                        'datatype' => 'int',
-                    ]),
-                    new Tag\GenericTag('link', 'https://php.net/manual/en/countable.count.php')
-                ]
-            ])
-        );
+        $methodGenerator = (new MethodGenerator($methodName))
+            ->setReturnType('int')
+            ->setDocBlock(
+                new DocBlockGenerator(
+                    'Count elements of an object',
+                    'The return value is cast to an integer.',
+                    [
+                        new Tag\ReturnTag('int'),
+                        new Tag\GenericTag('link', 'https://php.net/manual/en/countable.count.php')
+                    ]
+                )
+            );
 
         $methodGenerator->setBody(
             sprintf('return is_array($this->%1$s) ? count($this->%1$s) : 0;', $firstProperty->getName())
