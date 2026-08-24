@@ -7,7 +7,7 @@
         "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
         "phpro/soap-client": "~v3",
         "laminas/laminas-code": "^4.14.0",
-        "webmasterskaya/base-soap-lib": "^1.0"
+        "webmasterskaya/base-soap-lib": "^2.0"
     },
 	"autoload": {
 		"psr-4": {
