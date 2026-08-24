@@ -2,11 +2,11 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Exception;
 use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\MethodGenerator;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\CodeGenerator\Context\TypeContext;
-use Phpro\SoapClient\CodeGenerator\LaminasCodeFactory\DocBlockGeneratorFactory;
 use Phpro\SoapClient\CodeGenerator\Model\Type;
 use Phpro\SoapClient\Exception\AssemblerException;
 
@@ -20,21 +20,10 @@ class ConstructorAssembler implements AssemblerInterface
     /**
      * ConstructorAssembler constructor.
      *
-     * @param ConstructorAssemblerOptions|null $options
      */
     public function __construct(ConstructorAssemblerOptions $options = null)
     {
         $this->options = $options ?? new ConstructorAssemblerOptions();
-    }
-
-    /**
-     * @param ContextInterface $context
-     *
-     * @return bool
-     */
-    public function canAssemble(ContextInterface $context): bool
-    {
-        return $context instanceof TypeContext;
     }
 
     /**
@@ -49,15 +38,18 @@ class ConstructorAssembler implements AssemblerInterface
             $class->removeMethod('__construct');
             $constructor = $this->assembleConstructor($type);
             $class->addMethodFromGenerator($constructor);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw AssemblerException::fromException($e);
         }
     }
 
+    public function canAssemble(ContextInterface $context): bool
+    {
+        return $context instanceof TypeContext;
+    }
+
     /**
-     * @param Type $type
      *
-     * @return MethodGenerator
      * @throws \Laminas\Code\Generator\Exception\InvalidArgumentException
      */
     private function assembleConstructor(Type $type): MethodGenerator
@@ -72,8 +64,8 @@ class ConstructorAssembler implements AssemblerInterface
                 'type' => sprintf(
                     '%1$s%2$s',
                     $this->options->withNullableParams() ? '?' : '',
-                    $property->getType()
-                )
+                    $property->getType(),
+                ),
             ] : [];
 
             $withDefaultValue = $this->options->withNullableParams() ? ['defaultvalue' => null] : [];
@@ -81,7 +73,7 @@ class ConstructorAssembler implements AssemblerInterface
             $constructor->setParameter(
                 array_merge([
                     'name' => $property->getName(),
-                ], $withTypeHints, $withDefaultValue)
+                ], $withTypeHints, $withDefaultValue),
             );
 
             if ($this->options->useDocBlocks()) {
@@ -91,8 +83,8 @@ class ConstructorAssembler implements AssemblerInterface
                         '%s%s $%s',
                         $property->getType(),
                         $this->options->withNullableParams() ? '|null' : '',
-                        $property->getName()
-                    )
+                        $property->getName(),
+                    ),
                 ]);
             }
         }

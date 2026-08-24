@@ -5,25 +5,20 @@ namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Rules;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\CodeGenerator\Context\PropertyContext;
 use Phpro\SoapClient\CodeGenerator\Rules\RuleInterface;
-use Webmasterskaya\Soap\Base\Helper\Normalizer;
+use Phpro\SoapClient\CodeGenerator\Util\Normalizer;
 
 class PropertyTypeMatchesRule implements RuleInterface
 {
-
-    /**
-     * @var RuleInterface
-     */
-    private $subRule;
-
     /**
      * @var string
      */
     private $regex;
 
     /**
-     * @param RuleInterface $subRule
-     * @param string        $regex
+     * @var RuleInterface
      */
+    private $subRule;
+
     public function __construct(RuleInterface $subRule, string $regex)
     {
         $this->subRule = $subRule;

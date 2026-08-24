@@ -2,6 +2,7 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Exception;
 use Laminas\Code\Generator\DocBlock\Tag\ParamTag;
 use Laminas\Code\Generator\DocBlock\Tag\ReturnTag;
 use Laminas\Code\Generator\DocBlockGenerator;
@@ -9,7 +10,6 @@ use Laminas\Code\Generator\MethodGenerator;
 use Phpro\SoapClient\CodeGenerator\Assembler\FluentSetterAssemblerOptions;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\CodeGenerator\Context\PropertyContext;
-use Phpro\SoapClient\CodeGenerator\LaminasCodeFactory\DocBlockGeneratorFactory;
 use Phpro\SoapClient\CodeGenerator\Util\Normalizer;
 use Phpro\SoapClient\Exception\AssemblerException;
 
@@ -23,19 +23,10 @@ class FluentSetterAssembler implements AssemblerInterface
     /**
      * FluentSetterAssembler constructor.
      *
-     * @param FluentSetterAssemblerOptions|null $options
      */
     public function __construct(FluentSetterAssemblerOptions $options = null)
     {
         $this->options = $options ?? new FluentSetterAssemblerOptions();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function canAssemble(ContextInterface $context): bool
-    {
-        return $context instanceof PropertyContext;
     }
 
     public function assemble(ContextInterface $context)
@@ -57,8 +48,8 @@ class FluentSetterAssembler implements AssemblerInterface
                 sprintf(
                     '$this->%1$s = $%1$s;%2$sreturn $this;',
                     $property->getName(),
-                    $class::LINE_FEED
-                )
+                    $class::LINE_FEED,
+                ),
             );
             if ($this->options->useReturnType()) {
                 $methodGenerator->setReturnType($class->getNamespaceName() . '\\' . $class->getName());
@@ -67,13 +58,21 @@ class FluentSetterAssembler implements AssemblerInterface
                 $methodGenerator->setDocBlock(
                     new DocBlockGenerator(tags: [
                         new ParamTag(description: sprintf('%s $%s', $property->getType(), $property->getName())),
-                        new ReturnTag(description: '$this')
-                    ])
+                        new ReturnTag(description: '$this'),
+                    ]),
                 );
             }
             $class->addMethodFromGenerator($methodGenerator);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw AssemblerException::fromException($e);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function canAssemble(ContextInterface $context): bool
+    {
+        return $context instanceof PropertyContext;
     }
 }

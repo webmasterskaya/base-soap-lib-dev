@@ -9,6 +9,20 @@
         "laminas/laminas-code": "^4.14.0",
         "webmasterskaya/base-soap-lib": "^2.0"
     },
+    "require-dev": {
+        "nyholm/psr7": "^1.8",
+        "friendsofphp/php-cs-fixer": "^3.65",
+        "symfony/cache": "^7.0",
+        "symfony/http-client": "^7.3"
+    },
+    "scripts": {
+        "cs": [
+            "php-cs-fixer fix --ansi --dry-run --diff"
+        ],
+        "cs-fix": [
+            "php-cs-fixer fix --ansi"
+        ]
+    },
 	"autoload": {
 		"psr-4": {
 			"Webmasterskaya\\Soap\\Base\\Dev\\": "src/"
@@ -20,5 +34,14 @@
             "email": "dev@webmasterskaya.xyz"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+	"config": {
+        "platform": {
+            "php": "8.2"
+        },
+        "sort-packages": true,
+		"allow-plugins": {
+			"php-http/discovery": true
+		}
+	}
 }

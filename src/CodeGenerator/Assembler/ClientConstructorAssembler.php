@@ -2,6 +2,7 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Exception;
 use Laminas\Code\Generator\AbstractMemberGenerator;
 use Laminas\Code\Generator\ClassGenerator;
 use Laminas\Code\Generator\DocBlock\Tag\VarTag;
@@ -13,9 +14,10 @@ use Laminas\Code\Generator\TypeGenerator;
 use Phpro\SoapClient\CodeGenerator\Context\ClientContext;
 use Phpro\SoapClient\CodeGenerator\Context\ContextInterface;
 use Phpro\SoapClient\Exception\AssemblerException;
-use Webmasterskaya\Soap\Base\Caller\CallerInterface;
 
 use function Psl\Type\non_empty_string;
+
+use Webmasterskaya\Soap\Base\Caller\CallerInterface;
 
 class ClientConstructorAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\ClientConstructorAssembler
 {
@@ -23,7 +25,7 @@ class ClientConstructorAssembler extends \Phpro\SoapClient\CodeGenerator\Assembl
     {
         if (!$context instanceof ClientContext) {
             throw new AssemblerException(
-                __METHOD__ . ' expects an ' . ClientContext::class . ' as input ' . get_class($context) . ' given'
+                __METHOD__ . ' expects an ' . ClientContext::class . ' as input ' . get_class($context) . ' given',
             );
         }
 
@@ -35,22 +37,22 @@ class ClientConstructorAssembler extends \Phpro\SoapClient\CodeGenerator\Assembl
                 (new PropertyGenerator(
                     name: 'caller',
                     flags: AbstractMemberGenerator::FLAG_PRIVATE,
-                    type: TypeGenerator::fromTypeString(CallerInterface::class)
+                    type: TypeGenerator::fromTypeString(CallerInterface::class),
                 ))
                     ->setDocBlock(new DocBlockGenerator(tags: [new VarTag(description: $caller)]))
-                    ->omitDefaultValue(true)
+                    ->omitDefaultValue(true),
             );
             $class->removeMethod('__construct');
             $class->addMethodFromGenerator(
                 (new MethodGenerator(
                     name: '__construct',
                     parameters: [
-                        new ParameterGenerator('caller', CallerInterface::class)
+                        new ParameterGenerator('caller', CallerInterface::class),
                     ],
-                    body: '$this->caller = $caller;'
-                ))
+                    body: '$this->caller = $caller;',
+                )),
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw AssemblerException::fromException($e);
         }
 
