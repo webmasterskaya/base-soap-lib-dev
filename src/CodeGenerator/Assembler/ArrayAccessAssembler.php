@@ -2,6 +2,8 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use ArrayAccess;
+use Exception;
 use Laminas\Code\Generator\ClassGenerator;
 use Laminas\Code\Generator\DocBlock\Tag;
 use Laminas\Code\Generator\DocBlockGenerator;
@@ -15,17 +17,6 @@ use Phpro\SoapClient\Exception\AssemblerException;
 
 class ArrayAccessAssembler implements AssemblerInterface
 {
-
-    /**
-     * @param ContextInterface $context
-     *
-     * @return bool
-     */
-    public function canAssemble(ContextInterface $context): bool
-    {
-        return $context instanceof TypeContext;
-    }
-
     /**
      * @inheritDoc
      */
@@ -36,7 +27,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         $firstProperty = count($properties) ? current($properties) : null;
 
         try {
-            $interfaceAssembler = new InterfaceAssembler(\ArrayAccess::class);
+            $interfaceAssembler = new InterfaceAssembler(ArrayAccess::class);
             if ($interfaceAssembler->canAssemble($context)) {
                 $interfaceAssembler->assemble($context);
             }
@@ -47,9 +38,14 @@ class ArrayAccessAssembler implements AssemblerInterface
                 $this->implementOffsetSet($class, $firstProperty);
                 $this->implementOffsetUnset($class, $firstProperty);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw AssemblerException::fromException($e);
         }
+    }
+
+    public function canAssemble(ContextInterface $context): bool
+    {
+        return $context instanceof TypeContext;
     }
 
     private function implementOffsetExists(ClassGenerator $class, Property $firstProperty)
@@ -64,7 +60,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         $methodGenerator->setDocBlock(new DocBlockGenerator(tags: [new Tag\GenericTag('inheritDoc')]));
 
         $methodGenerator->setBody(
-            sprintf('return is_array($this->%1$s) && isset($this->%1$s[$offset]);', $firstProperty->getName())
+            sprintf('return is_array($this->%1$s) && isset($this->%1$s[$offset]);', $firstProperty->getName()),
         );
         $class->addMethodFromGenerator($methodGenerator);
     }
@@ -83,7 +79,7 @@ class ArrayAccessAssembler implements AssemblerInterface
         $lines = [
             sprintf('return (is_array($this->%1$s) && isset($this->%1$s[$offset]))', $firstProperty->getName()),
             "\t" . sprintf('? $this->%1$s[$offset]', $firstProperty->getName()),
-            "\t" . ': null;'
+            "\t" . ': null;',
         ];
 
         $body = implode($class::LINE_FEED, $lines);
@@ -109,7 +105,7 @@ class ArrayAccessAssembler implements AssemblerInterface
             "\t" . "\t" . "\t" . sprintf(
                 '\'The %1$s property can only contain items of type %2$s, %%s given\',',
                 $firstProperty->getName(),
-                $firstProperty->getType()
+                $firstProperty->getType(),
             ),
             "\t" . "\t" . "\t" . 'is_object($value)',
             "\t" . "\t" . "\t" . "\t" . '? get_class($value)',
@@ -125,13 +121,13 @@ class ArrayAccessAssembler implements AssemblerInterface
             "\t" . "\t" . "\t" . sprintf(
                 '\'The property %1$s::$%2$s must be array, %%s given\',',
                 $class->getName(),
-                $firstProperty->getName()
+                $firstProperty->getName(),
             ),
             "\t" . "\t" . "\t" . sprintf('is_object($this->%1$s)', $firstProperty->getName()),
             "\t" . "\t" . "\t" . "\t" . sprintf('? get_class($this->%1$s)', $firstProperty->getName()),
             "\t" . "\t" . "\t" . "\t" . sprintf(
                 ': sprintf(\'%%1$s(%%2$s)\', gettype($this->%1$s), var_export($this->%1$s, true))',
-                $firstProperty->getName()
+                $firstProperty->getName(),
             ),
             "\t" . "\t" . ')',
             "\t" . ');',
@@ -141,7 +137,7 @@ class ArrayAccessAssembler implements AssemblerInterface
             "\t" . sprintf('$this->%s[] = $value;', $firstProperty->getName()),
             '} else {',
             "\t" . sprintf('$this->%s[$offset] = $value;', $firstProperty->getName()),
-            '}'
+            '}',
         ];
         $body = implode($class::LINE_FEED, $lines);
 

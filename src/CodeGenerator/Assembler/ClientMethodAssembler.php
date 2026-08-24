@@ -2,6 +2,7 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Exception;
 use Laminas\Code\Generator\ClassGenerator;
 use Laminas\Code\Generator\DocBlock\Tag\ParamTag;
 use Laminas\Code\Generator\DocBlock\Tag\ReturnTag;
@@ -26,7 +27,7 @@ class ClientMethodAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\Cl
     {
         if (!$context instanceof ClientMethodContext) {
             throw new AssemblerException(
-                __METHOD__ . ' expects an ' . ClientMethodContext::class . ' as input ' . get_class($context) . ' given'
+                __METHOD__ . ' expects an ' . ClientMethodContext::class . ' as input ' . get_class($context) . ' given',
             );
         }
         $class = $context->getClass();
@@ -51,54 +52,16 @@ class ClientMethodAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\Cl
                     name: $phpMethodName,
                     parameters: $param === null ? [] : [$param],
                     body: $methodBody,
-                    docBlock: $docblock
-                ))->setReturnType($this->decideOnReturnType($context, true))
+                    docBlock: $docblock,
+                ))->setReturnType($this->decideOnReturnType($context, true)),
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw AssemblerException::fromException($e);
         }
 
         return true;
     }
 
-    private function generateMethodBody(
-        ClassGenerator $class,
-        ?ParameterGenerator $param,
-        ClientMethod $method,
-        $context
-    ): string {
-        $assertInstanceOf = static fn(string $class): string => '\\Psl\\Type\\instance_of(\\' . ltrim(
-                $class,
-                '\\'
-            ) . '::class)->assert($response);';
-
-        $code = [
-            sprintf(
-                '/** @var %s $response */',
-                $this->decideOnReturnType($context, true)
-            ),
-            sprintf(
-                '$response = ($this->caller)(\'%s\', %s);',
-                $method->getMethodName(),
-                $param === null
-                    ? 'new ' . $this->generateClassNameAndAddImport(MultiArgumentRequest::class, $class) . '([])'
-                    : '$' . $param->getName()
-            ),
-            '',
-            $assertInstanceOf($this->decideOnReturnType($context, true)),
-            $assertInstanceOf(ResultInterface::class),
-            '',
-            'return $response;',
-        ];
-
-        return implode($class::LINE_FEED, $code);
-    }
-
-    /**
-     * @param ClientMethodContext $context
-     *
-     * @return ParameterGenerator|null
-     */
     private function createParamsFromContext(ClientMethodContext $context): ?ParameterGenerator
     {
         $method = $context->getMethod();
@@ -117,11 +80,39 @@ class ClientMethodAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\Cl
         return new ParameterGenerator(name: 'multiArgumentRequest', type: MultiArgumentRequest::class);
     }
 
-    /**
-     * @param ClientMethodContext $context
-     *
-     * @return DocBlockGenerator
-     */
+    private function generateMethodBody(
+        ClassGenerator $class,
+        ?ParameterGenerator $param,
+        ClientMethod $method,
+        $context,
+    ): string {
+        $assertInstanceOf = static fn(string $class): string => '\\Psl\\Type\\instance_of(\\' . ltrim(
+            $class,
+            '\\',
+        ) . '::class)->assert($response);';
+
+        $code = [
+            sprintf(
+                '/** @var %s $response */',
+                $this->decideOnReturnType($context, true),
+            ),
+            sprintf(
+                '$response = ($this->caller)(\'%s\', %s);',
+                $method->getMethodName(),
+                $param === null
+                    ? 'new ' . $this->generateClassNameAndAddImport(MultiArgumentRequest::class, $class) . '([])'
+                    : '$' . $param->getName(),
+            ),
+            '',
+            $assertInstanceOf($this->decideOnReturnType($context, true)),
+            $assertInstanceOf(ResultInterface::class),
+            '',
+            'return $response;',
+        ];
+
+        return implode($class::LINE_FEED, $code);
+    }
+
     private function generateMultiArgumentDocblock(ClientMethodContext $context): DocBlockGenerator
     {
         $class = $context->getClass();
@@ -139,33 +130,28 @@ class ClientMethodAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\Cl
                         '%s $%s',
                         $this->generateClassNameAndAddImport(
                             MultiArgumentRequest::class,
-                            $class
+                            $class,
                         ),
-                        'multiArgumentRequest'
-                    )
+                        'multiArgumentRequest',
+                    ),
                 ),
                 new ReturnTag(
                     description: sprintf(
                         '%s & %s',
                         $this->generateClassNameAndAddImport(ResultInterface::class, $class),
-                        $this->decideOnReturnType($context, false)
-                    )
+                        $this->decideOnReturnType($context, false),
+                    ),
                 ),
                 new ThrowsTag(
                     description: $this->generateClassNameAndAddImport(
                         SoapException::class,
-                        $class
-                    )
-                )
-            ]
+                        $class,
+                    ),
+                ),
+            ],
         );
     }
 
-    /**
-     * @param ClientMethodContext $context
-     *
-     * @return DocBlockGenerator
-     */
     private function generateSingleArgumentDocblock(ClientMethodContext $context): DocBlockGenerator
     {
         $method = $context->getMethod();
@@ -177,15 +163,15 @@ class ClientMethodAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\Cl
                 description: sprintf(
                     '%s & %s',
                     $this->generateClassNameAndAddImport(ResultInterface::class, $class),
-                    $this->decideOnReturnType($context, false)
-                )
+                    $this->decideOnReturnType($context, false),
+                ),
             ),
             new ThrowsTag(
                 description: $this->generateClassNameAndAddImport(
                     SoapException::class,
-                    $class
-                )
-            )
+                    $class,
+                ),
+            ),
         ];
 
         if ($param) {
@@ -196,15 +182,15 @@ class ClientMethodAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\Cl
                         '%s & %s $%s',
                         $this->generateClassNameAndAddImport(RequestInterface::class, $class),
                         $this->generateClassNameAndAddImport($param->getType(), $class, true),
-                        $param->getName()
-                    )
-                )
+                        $param->getName(),
+                    ),
+                ),
             );
         }
 
         return (new DocBlockGenerator(
             shortDescription: $context->getMethod()->getMeta()->docs()->unwrapOr(''),
-            tags: $tags
+            tags: $tags,
         ))->setWordWrap(false);
     }
 }

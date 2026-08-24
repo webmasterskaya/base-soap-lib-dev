@@ -2,6 +2,8 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
+use Countable;
+use Exception;
 use Laminas\Code\Generator\DocBlock\Tag;
 use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\MethodGenerator;
@@ -13,16 +15,6 @@ use Phpro\SoapClient\Exception\AssemblerException;
 
 class CountableAssembler implements AssemblerInterface
 {
-    /**
-     * @param ContextInterface $context
-     *
-     * @return bool
-     */
-    public function canAssemble(ContextInterface $context): bool
-    {
-        return $context instanceof TypeContext;
-    }
-
     public function assemble(ContextInterface $context)
     {
         $class = $context->getClass();
@@ -30,7 +22,7 @@ class CountableAssembler implements AssemblerInterface
         $firstProperty = count($properties) ? current($properties) : null;
 
         try {
-            $countableAssembler = new InterfaceAssembler(\Countable::class);
+            $countableAssembler = new InterfaceAssembler(Countable::class);
             if ($countableAssembler->canAssemble($context)) {
                 $countableAssembler->assemble($context);
             }
@@ -38,9 +30,13 @@ class CountableAssembler implements AssemblerInterface
             if ($firstProperty) {
                 $this->implementCount($class, $firstProperty);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw AssemblerException::fromException($e);
         }
+    }
+    public function canAssemble(ContextInterface $context): bool
+    {
+        return $context instanceof TypeContext;
     }
 
     private function implementCount($class, $firstProperty)
@@ -56,13 +52,13 @@ class CountableAssembler implements AssemblerInterface
                     'The return value is cast to an integer.',
                     [
                         new Tag\ReturnTag('int'),
-                        new Tag\GenericTag('link', 'https://php.net/manual/en/countable.count.php')
-                    ]
-                )
+                        new Tag\GenericTag('link', 'https://php.net/manual/en/countable.count.php'),
+                    ],
+                ),
             );
 
         $methodGenerator->setBody(
-            sprintf('return is_array($this->%1$s) ? count($this->%1$s) : 0;', $firstProperty->getName())
+            sprintf('return is_array($this->%1$s) ? count($this->%1$s) : 0;', $firstProperty->getName()),
         );
         $class->addMethodFromGenerator($methodGenerator);
     }

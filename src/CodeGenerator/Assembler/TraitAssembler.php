@@ -2,7 +2,4 @@
 
 namespace Webmasterskaya\Soap\Base\Dev\CodeGenerator\Assembler;
 
-class TraitAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\TraitAssembler
-{
-
-}
+class TraitAssembler extends \Phpro\SoapClient\CodeGenerator\Assembler\TraitAssembler {}
